@@ -28,7 +28,6 @@ class Collection(models.Model):
         ordering = ['name']
         
 
-
 class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
