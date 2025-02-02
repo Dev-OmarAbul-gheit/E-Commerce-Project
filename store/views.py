@@ -1,8 +1,8 @@
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from .models import User
-from .serializers import SignUpSerializer, SignInSerializer, UserSerializer
+from .models import User, Collection
+from .serializers import SignUpSerializer, SignInSerializer, UserSerializer, CollectionSerializer
 
 
 class SignUpViewSet(CreateModelMixin, GenericViewSet):
@@ -23,3 +23,8 @@ class ProfileViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Ge
         if self.request.method == "GET":
             return User.objects.filter(id=self.request.user.id)
         return User.objects.all()
+    
+
+class CollectionViewSet(ModelViewSet):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer

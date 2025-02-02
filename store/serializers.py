@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from djoser.serializers import UserSerializer as BaseUserSerializer, UserCreateSerializer as BaseUserCreateSerializer
-from .models import User
+from .models import User, Collection
 
 
 class SignUpSerializer(BaseUserCreateSerializer):
@@ -40,3 +40,14 @@ class UserSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    products_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Collection
+        fields = ['id', 'name', 'description', 'products_count']
+
+    def get_products_count(self, collection):
+        return collection.products.count()
