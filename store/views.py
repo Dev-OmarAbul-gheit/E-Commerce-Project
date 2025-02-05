@@ -28,7 +28,7 @@ class ProfileViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Ge
     
 
 class CollectionViewSet(ModelViewSet):
-    queryset = Collection.objects.all()
+    queryset = Collection.objects.prefetch_related('products').all()
     serializer_class = CollectionSerializer
 
 
