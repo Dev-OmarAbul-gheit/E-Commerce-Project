@@ -2,12 +2,12 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from djoser.serializers import UserSerializer as BaseUserSerializer, UserCreateSerializer as BaseUserCreateSerializer
-from .models import User, Collection, Product, ProductImage
+from . import models
 
 
 class SignUpSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
-        model = User
+        model = models.User
         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
 
     
@@ -38,7 +38,7 @@ class SignInSerializer(UserToken, serializers.Serializer):
 
 class UserSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
-        model = User
+        model = models.User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 
@@ -46,7 +46,7 @@ class CollectionSerializer(serializers.ModelSerializer):
     products_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = Collection
+        model = models.Collection
         fields = ['id', 'name', 'description', 'products_count']
 
     def get_products_count(self, collection):
@@ -56,15 +56,21 @@ class CollectionSerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         product_id = self.context['product_id']
-        return ProductImage.objects.create(product_id=product_id, **validated_data)
+        return models.ProductImage.objects.create(product_id=product_id, **validated_data)
 
     class Meta:
-        model = ProductImage
+        model = models.ProductImage
         fields = ['id', 'image']
 
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     class Meta:
-        model = Product
+        model = models.Product
         fields = ['id', 'name', 'slug', 'description', 'price', 'stock', 'collection', 'images']
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Customer
+        fields = ['id', 'user_id', 'first_name', 'last_name', 'email', 'phone', 'address']

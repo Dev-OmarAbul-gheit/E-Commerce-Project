@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework_nested.routers import DefaultRouter, NestedDefaultRouter
 from .views import (SignUpViewSet, SignInViewSet,
                     ProfileViewSet, CollectionViewSet,
-                    ProductViewSet, ProductImageViewSet)
+                    ProductViewSet, ProductImageViewSet,
+                    CustomerViewSet)
 
 
 router = DefaultRouter()
@@ -11,6 +12,7 @@ router.register("signin", SignInViewSet, basename="sign-in")
 router.register("profile", ProfileViewSet, basename="profile")
 router.register('collections', viewset=CollectionViewSet, basename='collection')
 router.register('products', viewset=ProductViewSet, basename='product')
+router.register('customers', viewset=CustomerViewSet, basename='customer')
 
 products_router = NestedDefaultRouter(router, 'products', lookup='product')
 products_router.register('images', viewset=ProductImageViewSet, basename='product-image')

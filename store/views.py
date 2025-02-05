@@ -1,10 +1,11 @@
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from .models import User, Collection, Product, ProductImage
+from .models import User, Collection, Product, ProductImage, Customer
 from .serializers import (SignUpSerializer, SignInSerializer,
                           UserSerializer, CollectionSerializer,
-                          ProductSerializer, ProductImageSerializer,)
+                          ProductSerializer, ProductImageSerializer,
+                          CustomerSerializer)
 
 
 class SignUpViewSet(CreateModelMixin, GenericViewSet):
@@ -46,3 +47,8 @@ class ProductImageViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         return {'product_id': self.kwargs['product_pk']}
+
+
+class CustomerViewSet(ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
