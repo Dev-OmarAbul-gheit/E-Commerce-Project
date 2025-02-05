@@ -1,6 +1,6 @@
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import User, Collection, Product, ProductImage, Customer
 from .serializers import (SignUpSerializer, SignInSerializer,
                           UserSerializer, CollectionSerializer,
@@ -52,3 +52,4 @@ class ProductImageViewSet(ModelViewSet):
 class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    permission_classes = [IsAdminUser]
