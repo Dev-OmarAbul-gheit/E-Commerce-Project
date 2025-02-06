@@ -3,11 +3,12 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateMo
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
-from .models import User, Collection, Product, ProductImage, Customer
+from .models import User, Collection, Product, ProductImage, Customer, Cart, CartItem
 from .serializers import (SignUpSerializer, SignInSerializer,
                           UserSerializer, CollectionSerializer,
                           ProductSerializer, ProductImageSerializer,
-                          CustomerSerializer)
+                          CustomerSerializer, CartSerializer,
+                          RetrieveCartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer)
 
 
 class SignUpViewSet(CreateModelMixin, GenericViewSet):
@@ -68,3 +69,29 @@ class CustomerViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+
+
+class CartViewSet(CreateModelMixin,
+                  RetrieveModelMixin,
+                  DestroyModelMixin,
+                  GenericViewSet
+                ):
+    queryset = Cart.objects.prefetch_related('items__product').all()
+    serializer_class = CartSerializer
+
+
+class CartItemViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart = self.kwargs['cart_pk']).select_related('product')
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return RetrieveCartItemSerializer
+        
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
