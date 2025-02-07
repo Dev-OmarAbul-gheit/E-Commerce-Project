@@ -111,16 +111,9 @@ class Order(models.Model):
     ]
     placed_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    cost = models.DecimalField(max_digits=20, decimal_places=5)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
-    @property
-    def items_count(self):
-        return self.items.count()
-
-    @property
-    def cost(self):
-        return sum([(item.unit_price * item.quantity) for item in self.items.all()])
-    
     class Meta:
         ordering = ['-placed_at']
 
