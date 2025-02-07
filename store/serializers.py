@@ -76,14 +76,14 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_id', 'first_name', 'last_name', 'email', 'phone', 'address']
 
 
-class CartItemProductSerializer(serializers.ModelSerializer):
+class SimpleProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = ['id', 'name', 'price']
 
 
 class RetrieveCartItemSerializer(serializers.ModelSerializer):
-    product = CartItemProductSerializer()
+    product = SimpleProductSerializer()
     total_price = serializers.SerializerMethodField()
 
     def get_total_price(self, item: models.CartItem):
