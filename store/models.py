@@ -83,10 +83,6 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    @property
-    def items_count(self):
-        return self.items.count()
-
     class Meta:
         ordering =['-created_at']
 
