@@ -47,6 +47,10 @@ class ProductViewSet(ModelViewSet):
         product = Product.objects.get(pk=pk)
         if product.orderitems.count() > 0:
             return Response({'error' : 'That product can not be deleted yet as it is included in some orders!'})
+        
+        elif product.cartitems.count() > 0:
+            return Response({'error' : 'That product can not be deleted now as it is being added to a shopping cart!'})
+        
         return super().destroy(request, pk)
 
 
