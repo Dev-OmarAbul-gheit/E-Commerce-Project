@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from djoser.serializers import UserSerializer as BaseUserSerializer, UserCreateSerializer as BaseUserCreateSerializer
@@ -140,3 +141,80 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Cart
         fields = ['id', 'items', 'total_price']
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+    class Meta:
+        model = models.OrderItem
+        fields = ['id', 'product', 'unit_price', 'quantity']
+
+
+class RetrieveOrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = models.Order
+        fields = ['id', 'customer', 'placed_at', 'status', 'items', 'cost']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    cart_id = serializers.UUIDField()
+
+    def validate_cart_id(self, cart_id):
+        """
+        This method is used to validate invalid value of cart id
+        We have 2 possible cases:
+            - No cart with the given id
+            - The cart with the given id is empty
+        """
+        if not models.Cart.objects.filter(pk=cart_id).exists():
+            raise serializers.ValidationError('There is no cart exist with the given cart id!')
+        elif models.Cart.objects.get(pk=cart_id).items.count() == 0:
+            raise serializers.ValidationError('Can not create an order with an empty cart!')
+        return cart_id
+
+    def save(self, **kwargs):
+        with transaction.atomic():
+            cart_id = self.validated_data['cart_id']
+            customer = models.Customer.objects.get(user_id = self.context['user_id'])
+
+            cart_items = models.CartItem.objects.select_related('product').filter(cart_id=cart_id)
+            items_cost = sum([item.product.price * item.quantity for item in cart_items])
+
+            # Creating an order
+            order = models.Order.objects.create(customer = customer, cost=items_cost)
+
+            # creating order item instance for each cart item and associate it with the created order.
+            order_items = [
+                models.OrderItem(
+                    order=order,
+                    product = item.product,
+                    unit_price = item.product.price,
+                    quantity= item.quantity,
+                ) for item in cart_items
+            ]
+
+            # Save the order items in the database
+            models.OrderItem.objects.bulk_create(order_items)
+
+            # deleting the cart will delete its cart items.
+            models.Cart.objects.get(pk=cart_id).delete()
+
+            return order
+        
+
+class AdminUpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Order
+        fields = ['status']
+
+
+class UserCancelOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Order
+        fields = ['status']
+
+    def update(self, instance, validated_data):
+        instance.status = 'C'
+        instance.save()
+        return instance
