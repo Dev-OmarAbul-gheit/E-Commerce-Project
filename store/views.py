@@ -84,13 +84,15 @@ class CustomerViewSet(ModelViewSet):
             return Response(serializer.data)
 
 
-class CartViewSet(CreateModelMixin,
-                  RetrieveModelMixin,
-                  DestroyModelMixin,
-                  GenericViewSet
-                ):
+class CartViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
     queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
+
+    def list(self, request, *args, **kwargs):
+        if self.request.user.is_staff:
+            return super().list(request, *args, **kwargs)
+        return Response({"detail": "list all resources is not allowed for this user."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class CartItemViewSet(ModelViewSet):
