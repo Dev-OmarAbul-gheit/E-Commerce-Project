@@ -43,6 +43,12 @@ class ProductViewSet(ModelViewSet):
     queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializer
 
+    def destroy(self, request, pk):
+        product = Product.objects.get(pk=pk)
+        if product.orderitems.count() > 0:
+            return Response({'error' : 'That product can not be deleted yet as it is included in some orders!'})
+        return super().destroy(request, pk)
+
 
 class ProductImageViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
