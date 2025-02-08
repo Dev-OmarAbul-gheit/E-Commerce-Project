@@ -104,13 +104,13 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-        ('canceled', 'Canceled')
+        ('P', 'Pending'),
+        ('S', 'Shipped'),
+        ('D', 'Delivered'),
+        ('C', 'Canceled')
     ]
     placed_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P')
     cost = models.DecimalField(max_digits=20, decimal_places=5)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
