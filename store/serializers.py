@@ -113,11 +113,13 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             # update the quantity for an existing product
             cart_item.quantity += quantity
             cart_item.save()
-            return cart_item
+            self.instance = cart_item
 
         except models.CartItem.DoesNotExist:
             # add the given product to the cart as a new cart item
-            return models.CartItem.objects.create(cart_id=cart_id, **self.validated_data)
+            self.instance =  models.CartItem.objects.create(cart_id=cart_id, **self.validated_data)
+        
+        return self.instance
 
     class Meta:
         model = models.CartItem
